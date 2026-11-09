@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Paula Dossier</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Paula">
+<meta name="theme-color" content="#1F2A44">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#1F2A44; --moss:#B8552A; --mint:#FBF6EF; --paper:#FFFDF9; --gold:#E08A3C; --ink:#141B2D;
+  --bg:var(--mint); --card:var(--paper); --fg:var(--ink); --muted:#6B6A78; --line:#E6DCCF; --accent:var(--moss); --accent-ink:#fff; --hero:var(--forest); --hero-fg:#F6F1E8; --chip:#F1E4D4;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#10151F; --card:#171E2C; --fg:#EEE9E0; --muted:#A3A7B3; --line:#2A3345; --accent:#E8955A; --accent-ink:#10151F; --hero:#0B0F18; --hero-fg:#EEE9E0; --chip:#222B3C; color-scheme:dark;
+}}
+:root[data-theme="dark"]{ --bg:#10151F; --card:#171E2C; --fg:#EEE9E0; --muted:#A3A7B3; --line:#2A3345; --accent:#E8955A; --accent-ink:#10151F; --hero:#0B0F18; --hero-fg:#EEE9E0; --chip:#222B3C; color-scheme:dark; }
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; background:var(--bg); color:var(--fg); font-family:"DM Sans",-apple-system,"Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; height:100%; -webkit-tap-highlight-color:transparent}
+h1,h2,h3,.serif{font-family:"Fraunces","Iowan Old Style",Georgia,serif; font-weight:400; letter-spacing:-0.01em; margin:0}
+img,svg{max-width:100%}
+button{font:inherit; color:inherit}
+.view{display:none; padding:0 18px 110px}
+.view.active{display:block}
+.inner{max-width:560px; margin:0 auto}
+.hero{background:var(--hero); color:var(--hero-fg); margin:0 -18px; padding:calc(22px + env(safe-area-inset-top,0px)) 18px 26px}
+.hero .inner{display:flex; flex-direction:column; gap:10px}
+.hero h1{font-size:40px; line-height:1; font-variation-settings:"opsz" 144; }
+.hero h1 em{font-style:italic; font-weight:300}
+.hero p.sub{margin:0; color:#C5D0E6; font-size:14px}
+.wheel-wrap{position:relative; width:100%; max-width:340px; margin:8px auto 0}
+.wheel-wrap svg{width:100%; height:auto; display:block}
+.planet{cursor:pointer}
+.planet circle{transition:r .15s}
+.planet.sel circle{stroke:var(--gold); stroke-width:3}
+.planet text{font-family:"Fraunces",Georgia,serif; font-size:13px; fill:#F6F1E8; pointer-events:none}
+.sign-label{font-family:"Fraunces",Georgia,serif; font-size:10px; fill:#9FB0CC}
+.readout{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:12px 14px; min-height:84px}
+.readout h3{font-size:18px; color:var(--gold)}
+.readout p{margin:4px 0 0; font-size:14px; color:#DCE3EF}
+.readout .hint{color:#9FB0CC; font-size:13px}
+.sec{margin-top:26px}
+.sec h2{font-size:28px; line-height:1.1; margin-bottom:6px}
+.lede{color:var(--muted); margin:0 0 14px; font-size:15px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:10px}
+.facts{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px}
+.fact{background:var(--chip); border-radius:12px; padding:10px 12px}
+.fact b{display:block; font-family:"Fraunces",Georgia,serif; font-weight:500; font-size:20px; line-height:1.1}
+.fact span{font-size:12px; color:var(--muted)}
+details{border-top:1px solid var(--line)}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:14px 2px; gap:10px}
+summary::-webkit-details-marker{display:none}
+summary .t{font-family:"Fraunces",Georgia,serif; font-size:20px}
+summary .s{font-size:13px; color:var(--muted); display:block}
+summary .arrow{width:28px; height:28px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; flex:none; transition:transform .2s}
+details[open] summary .arrow{transform:rotate(45deg); background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+details .body{padding:0 2px 16px; font-size:15px}
+details .body p{margin:0 0 10px}
+.conf{display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:var(--chip); color:var(--muted); margin-left:6px; vertical-align:middle}
+.tag{display:inline-block; font-size:13px; padding:4px 10px; border-radius:999px; background:var(--chip); margin:0 6px 6px 0}
+.ll{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px}
+.ll button{background:var(--chip); border:1px solid transparent; border-radius:12px; padding:10px 4px; font-size:12px; line-height:1.15; display:flex; flex-direction:column; align-items:center; gap:4px; min-height:64px}
+.ll button .n{font-family:"Fraunces",Georgia,serif; font-size:22px; font-weight:500; line-height:1}
+.ll button.hot{background:var(--accent); color:var(--accent-ink)}
+.ll-note{font-size:13px; color:var(--muted); margin-top:8px}
+.step{display:flex; gap:12px; align-items:flex-start; padding:14px 2px; border-top:1px solid var(--line)}
+.step:last-child{border-bottom:1px solid var(--line)}
+.chk{flex:none; width:30px; height:30px; border-radius:50%; border:2px solid var(--accent); background:transparent; display:grid; place-items:center; margin-top:2px}
+.chk svg{opacity:0; transition:opacity .15s}
+.step.done .chk{background:var(--accent)}
+.step.done .chk svg{opacity:1}
+.step.done .txt h3{text-decoration:line-through; text-decoration-color:var(--muted); opacity:.7}
+.step .txt h3{font-size:19px; margin-bottom:3px}
+.step .txt p{margin:0; font-size:14px; color:var(--muted)}
+.step .why{font-size:13px; margin-top:6px; color:var(--fg); background:var(--chip); border-radius:10px; padding:8px 10px}
+.progress{height:8px; background:var(--chip); border-radius:99px; overflow:hidden; margin:10px 0 6px}
+.progress i{display:block; height:100%; width:0; background:var(--accent); transition:width .3s}
+.burger{display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--line)}
+.burger:last-child{border-bottom:1px solid var(--line)}
+.burger .rank{font-family:"Fraunces",Georgia,serif; font-size:24px; width:30px; color:var(--muted); text-align:center}
+.burger .name{flex:1}
+.burger .name b{display:block; font-weight:600}
+.burger .name span{font-size:13px; color:var(--muted)}
+.stars{display:flex; gap:3px}
+.stars button{width:30px; height:34px; border:0; background:none; padding:0; font-size:20px; color:var(--line)}
+.stars button.on{color:var(--gold)}
+.add{display:flex; gap:8px; margin-top:12px}
+.add input{flex:1; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:12px; padding:12px 14px; font:inherit; font-size:16px}
+.btn{border:0; background:var(--accent); color:var(--accent-ink); border-radius:12px; padding:12px 16px; font-weight:600}
+.btn.ghost{background:var(--chip); color:var(--fg)}
+.note{font-size:13px; color:var(--muted)}
+.cats{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 12px}
+.cats button{border:1px solid var(--line); background:var(--card); border-radius:999px; padding:8px 13px; font-size:14px}
+.cats button.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.txtcard{background:var(--hero); color:var(--hero-fg); border-radius:16px; padding:18px 18px 14px; margin-bottom:10px}
+.txtcard p{font-family:"Fraunces",Georgia,serif; font-size:21px; line-height:1.3; margin:0 0 14px; min-height:84px}
+.txtcard .row{display:flex; gap:8px}
+.txtcard .row button{flex:1; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:var(--hero-fg); border-radius:12px; padding:11px; font-weight:600}
+.txtcard .row button.primary{background:var(--gold); color:#1c1a12; border-color:var(--gold)}
+.ideas{margin:0; padding:0; list-style:none}
+.ideas li{padding:10px 0; border-top:1px solid var(--line); font-size:15px}
+.ideas li:first-child{border-top:0}
+.ideas li b{font-weight:600}
+.moon{counter-reset:m}
+.moon .card{display:flex; gap:12px}
+.moon .card::before{counter-increment:m; content:counter(m); font-family:"Fraunces",Georgia,serif; font-size:30px; line-height:1; color:var(--gold); flex:none; width:30px}
+.moon .card h3{font-size:19px; margin-bottom:4px}
+.moon .card p{margin:0; font-size:14px; color:var(--muted)}
+textarea.notes{width:100%; min-height:120px; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:12px; padding:12px 14px; font:inherit; font-size:16px; resize:vertical}
+.src p{margin:0 0 10px; font-size:14px}
+.src b{font-weight:600}
+nav.tabs{position:fixed; left:0; right:0; bottom:0; background:var(--card); border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px)); z-index:20}
+nav.tabs button{flex:1; border:0; background:none; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; font-size:10.5px; color:var(--muted); border-radius:12px; min-width:0}
+nav.tabs button svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+nav.tabs button.on{color:var(--accent)}
+nav.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.topbar{position:fixed; top:0; left:0; right:0; height:env(safe-area-inset-top,0px); background:var(--hero); z-index:30}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<section class="view active" id="v-chart">
+  <div class="hero"><div class="inner">
+    <h1>The Paula <em>Dossier</em></h1>
+    <p class="sub">Paula Marie Greenfield · born December 4, 1975, 1:54 PM, McAllen</p>
+    <div class="wheel-wrap"><svg id="wheel" viewBox="0 0 340 340" role="img" aria-label="Natal chart wheel, tap a planet"></svg></div>
+    <div class="readout" id="readout"><h3>Tap a planet</h3><p class="hint">Each one is a lever in the friendship. Start with the Sun, then the Moon.</p></div>
+  </div></div>
+  <div class="inner">
+    <div class="sec">
+      <h2>At a glance</h2>
+      <div class="facts">
+        <div class="fact"><b>Sagittarius</b><span>Sun · 12°, conjunct Neptune</span></div>
+        <div class="fact"><b>Capricorn</b><span>Moon · ~3°, on the Midheaven</span></div>
+        <div class="fact"><b>Aries</b><span>Rising · ~5°, Jupiter close by</span></div>
+        <div class="fact"><b>Gemini</b><span>Mars · 12° retrograde, opposite Sun</span></div>
+        <div class="fact"><b>11 / 2 / 8</b><span>Life Path · Expression · Soul Urge</span></div>
+        <div class="fact"><b>1/3</b><span>Human Design profile</span></div>
+        <div class="fact"><b>Consciousness</b><span>Right Angle Cross</span></div>
+        <div class="fact"><b>Wood Rabbit</b><span>Chinese zodiac</span></div>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>The systems</h2>
+      <p class="lede">Open each one. The parts that disagree are as useful as the parts that rhyme.</p>
+      <details open>
+        <summary><div><span class="t">Astrology</span><span class="s">A visionary with a boardroom moon</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <p><b>Sagittarius Sun conjunct Neptune.</b> Faith, meaning, big horizons, and Neptune pouring imagination and compassion into the core. She sees the best version of people first. The edge: she gives past empty.</p>
+          <p><b>Mars retrograde in Gemini, opposite her Sun.</b> A live wire between belief and argument. Fast thinker, good debater, restless energy. Explore ideas with her; never argue to win.</p>
+          <p><b>Moon in Capricorn on the Midheaven.</b> Feelings run through responsibility and reputation. She shows love by handling things and would rather be respected than rescued. Reliability is how she feels safe.</p>
+          <p><b>Aries rising with Jupiter.</b> Warmth, energy and nerve on first contact. Lucky when she moves first, generous to a fault.</p>
+          <p><b>Venus in Sagittarius.</b> Loves through laughter, honesty and freedom. Heavy or small-minded loses her fast.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Numerology</span><span class="s">The visionary who leads through harmony</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <span class="tag">Life Path 11</span><span class="tag">Birthday 4</span><span class="tag">Expression 2</span><span class="tag">Soul Urge 8</span><span class="tag">Personality 3</span><span class="tag">Personal Year 8</span>
+          <p style="margin-top:8px"><b>Life Path 11</b> is the master-number intuitive: picks up everything, here to illuminate, learning to trust the signal. <b>Birthday 4</b> is the builder underneath; she can make the vision real.</p>
+          <p><b>Expression 2</b> leads through connection and harmony, not force. <b>Soul Urge 8</b> wants influence, mastery and lasting security. <b>Personality 3</b> is why the world meets her joy first.</p>
+          <p><b>Personal Year 8 (2026)</b> is the harvest year: money, power and recognition for work already done.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Human Design</span><span class="s">Likely Projector · 1/3 · Cross of Consciousness</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <span class="tag">Sun 5.1</span><span class="tag">Earth 35.1</span><span class="tag">Design Sun 64.3</span><span class="tag">Design Earth 63.3</span>
+          <p style="margin-top:8px"><b>Likely a Projector</b> <span class="conf">verify</span>: built to guide, not grind. She sees how systems and people work, thrives on recognition and invitation, and burns out proving herself.</p>
+          <p><b>1/3 profile.</b> Investigator and Experimenter. She needs to understand the foundation before she trusts it, and she learns by trying things that don't work. Don't flinch at her experiments.</p>
+          <p><b>Gate 5</b> runs on rhythm and routine. Disrupt her pattern and everything feels off. <b>Gates 64 and 63</b> are head pressure: making sense of the past, questioning the future.</p>
+          <p><b>Cross of Consciousness.</b> Purpose through awareness itself: making sense of experience and helping others see what's really going on.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Gene Keys</span><span class="s">Patience, adventure, imagination, inquiry</span></div><span class="arrow">+</span></summary>
+        <div class="body">
+          <p><b>Life's Work · 5</b> Impatience → Patience → Timelessness. The work of her life is trusting timing.</p>
+          <p><b>Evolution · 35</b> Hunger → Adventure → Boundlessness. She grows by saying yes to the new.</p>
+          <p><b>Radiance · 64</b> Confusion → Imagination → Illumination. She shines when the mind is allowed to wander.</p>
+          <p><b>Purpose · 63</b> Doubt → Inquiry → Truth. Her purpose is the honest question, not the final answer.</p>
+        </div>
+      </details>
+      <details>
+        <summary><div><span class="t">Chinese zodiac</span><span class="s">Wood Rabbit</span></div><span class="arrow">+</span></summary>
+        <div class="body"><p>Gracious, generous, quietly ambitious. Wood Rabbits build community wherever they land, prefer harmony but won't be walked over, and grow steadily rather than loudly.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-profile">
+  <div class="inner">
+    <div class="sec">
+      <h2>How she's wired</h2>
+      <p class="lede">The synthesis, in plain English.</p>
+      <div class="card">
+        <p style="margin:0 0 10px">She is a visionary with a builder's spine. Sagittarius and Neptune give her faith and imagination; the Capricorn Moon on the Midheaven makes sure it turns into something real and respected. She reads rooms and systems fast, leads through connection, and shows love by handling things.</p>
+        <p style="margin:0 0 10px">She wants to be recognized for what she sees, invited rather than managed, and free to explore. She learns by experiment and has earned every lesson. Reliability from you is not optional; it is how she decides who's safe.</p>
+        <p style="margin:0">2026 is her harvest year. Help her collect, and celebrate it loudly.</p>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Love language tracker</h2>
+      <p class="lede">Unknown so far. Tap one each time she visibly lights up and let the data decide.</p>
+      <div class="card">
+        <div class="ll" id="ll"></div>
+        <p class="ll-note" id="ll-note">No data yet. Run the experiment for two weeks.</p>
+        <button class="btn ghost" style="margin-top:10px; font-size:13px; padding:8px 12px" onclick="resetLL()">Reset counts</button>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Do / don't</h2>
+      <div class="card">
+        <p style="margin:0 0 6px"><b>Do:</b> keep your word to the minute. Ask what she sees. Give her credit publicly. Explore ideas with her. Invite her somewhere new.</p>
+        <p style="margin:0"><b>Don't:</b> argue to win. Flake. Embarrass her in front of people. Push unasked advice. Treat her experiments as mistakes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-texts">
+  <div class="inner">
+    <div class="sec">
+      <h2>What to text her</h2>
+      <p class="lede">Pick a lane, tap Another until one sounds like you, copy, send. Sagittarius Sun wants an invitation; Capricorn Moon wants a time attached.</p>
+      <div class="cats" id="cats"></div>
+      <div class="txtcard"><p id="txt"></p><div class="row"><button onclick="nextTxt()">Another</button><button class="primary" id="copybtn" onclick="copyTxt()">Copy</button></div></div>
+      <p class="note">Rules: one text, not three. Ask one question, not a list. If she goes quiet, wait; the next one is on her.</p>
+    </div>
+    <div class="sec">
+      <h2>Things she's told me</h2>
+      <p class="lede">Log details here the minute she mentions them. A Capricorn Moon keeps a ledger; details you remember are deposits.</p>
+      <textarea class="notes" id="notes" placeholder="Her mom's name. The thing she is building this year. The thing she said she wanted to try. Dates that matter."></textarea>
+      <p class="note" id="notesnote">Saved on this phone.</p>
+    </div>
+    <div class="sec">
+      <h2>Love language idea bank</h2>
+      <p class="lede">All five, built for her chart. Rotate them and log hits on the Her tab.</p>
+      <details open>
+        <summary><div><span class="t">Words</span><span class="s">Recognition and respect</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Credit her in public.</b> Capricorn Moon on the Midheaven: reputation is emotional territory. Say her name in rooms she's not in and make sure she hears about it.</li>
+          <li><b>Name what she saw first.</b> Projector plus Life Path 11. "You called that months ago."</li>
+          <li><b>Ask her read, then use it.</b> Bring her a real decision and report back.</li>
+          <li><b>Honest and funny.</b> Venus in Sag. Truth with a laugh lands; truth with a lecture doesn't.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Time</span><span class="s">Scheduled, then spontaneous</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Put it on the calendar and keep it.</b> Capricorn Moon trusts a kept appointment more than a grand gesture.</li>
+          <li><b>Then surprise her inside it.</b> Sag Sun and Aries rising want the new: a different place, a detour, a plan B that's better than plan A.</li>
+          <li><b>Long conversations about ideas.</b> Mars in Gemini and the Head gates need to think out loud with someone who keeps up.</li>
+          <li><b>Respect her rhythm.</b> Gate 5. Don't hijack her mornings or her routines.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Gifts</span><span class="s">Quality, experience, meaning</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Something built to last.</b> Capricorn Moon and Soul Urge 8: one excellent thing over three cute ones.</li>
+          <li><b>Tickets to somewhere.</b> Sag Sun, Venus in Sag. Travel and experience are the love language of the fire.</li>
+          <li><b>A book that asks a good question.</b> Gate 63 lives on inquiry.</li>
+          <li><b>December 4 as its own event.</b> Early-December birthdays get eaten by the holidays. Don't let hers.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Acts</span><span class="s">Follow-through is the whole act</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Do what you said, when you said.</b> This is the single highest-leverage act for her chart.</li>
+          <li><b>Carry something for her once</b> without being asked, then step back. She'd rather be respected than rescued.</li>
+          <li><b>Make the introduction.</b> Expression 2 and Personal Year 8: she's harvesting, and the right connection is worth more than advice.</li>
+          <li><b>Show up to her thing early.</b> Reputation territory again.</li>
+        </ul></div>
+      </details>
+      <details>
+        <summary><div><span class="t">Touch</span><span class="s">Warm, confident, earned</span></div><span class="arrow">+</span></summary>
+        <div class="body"><ul class="ideas">
+          <li><b>Big hugs, not tentative ones.</b> Aries rising and Sag Sun are physical and warm; half-measures read as half-in.</li>
+          <li><b>Celebration touch.</b> High fives and a shoulder squeeze when she wins. Personality 3 loves the moment.</li>
+          <li><b>Read the Capricorn Moon.</b> In professional rooms she keeps distance. Match the setting.</li>
+          <li><b>Sit beside, not across,</b> for the long idea conversations.</li>
+        </ul></div>
+      </details>
+    </div>
+    <div class="sec moon">
+      <h2>To the moon</h2>
+      <p class="lede">The moves that turn a good friend into a best friend for life.</p>
+      <div class="card"><div><h3>Keep your word like it's a contract</h3><p>Capricorn Moon on the Midheaven. Every kept promise is a deposit; every flake is a withdrawal she doesn't forget. This outranks everything else on this list.</p></div></div>
+      <div class="card"><div><h3>Recognize, then invite</h3><p>Projector plus Life Path 11. Tell her specifically what you see in her, then invite her into something real. Never push.</p></div></div>
+      <div class="card"><div><h3>Credit her in rooms she's not in</h3><p>Reputation is her emotional currency. Make sure the good word gets back to her.</p></div></div>
+      <div class="card"><div><h3>Explore, don't argue</h3><p>Mars retrograde in Gemini opposite her Sun. She can out-debate you; don't make her. Think out loud together and she'll light up.</p></div></div>
+      <div class="card"><div><h3>Treat her experiments as research</h3><p>1/3 profile. She learns by trying what doesn't work. Never say "I told you so."</p></div></div>
+      <div class="card"><div><h3>Feed the fire</h3><p>Sag Sun, Venus in Sag, Aries rising. New places, new ideas, honest laughter. Boredom and smallness are the only real threats.</p></div></div>
+      <div class="card"><div><h3>Own December 4</h3><p>A standalone celebration, planned and kept to the minute. The Capricorn Moon will notice the planning as much as the party.</p></div></div>
+      <div class="card"><div><h3>Be the 1 AM call</h3><p>Say it once, plainly: "If it goes sideways, you call me, any hour." Then answer when it does. That's the whole moon.</p></div></div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-playbook">
+  <div class="inner">
+    <div class="sec">
+      <h2>The playbook</h2>
+      <p class="lede">Six moves. Check them off as you do them. Progress saves on this phone.</p>
+      <div class="progress"><i id="pbar"></i></div>
+      <p class="note" id="pnote">0 of 6</p>
+      <div id="steps"></div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-burgers">
+  <div class="inner">
+    <div class="sec">
+      <h2>The adventure list</h2>
+      <p class="lede">Sag Sun, Aries rising: she keeps score in experiences. Rate each one after you do it together.</p>
+      <div id="burgers"></div>
+      <div class="add">
+        <input id="newb" placeholder="Add an adventure" aria-label="Add an adventure">
+        <button class="btn" onclick="addBurger()">Add</button>
+      </div>
+      <p class="note" style="margin-top:10px">Rule: she picks every other one. Put it on the calendar, then keep it.</p>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-sources">
+  <div class="inner">
+    <div class="sec src">
+      <h2>How I got this</h2>
+      <p class="lede">What's solid, what's a hand calculation, and what to verify.</p>
+      <div class="card">
+        <p><b>Birth data.</b> December 4, 1975, 1:54 PM, McAllen, Texas → 19:54 UT (Central Standard Time). Coordinates 26.2°N, 98.2°W.</p>
+        <p><b>Sun.</b> From the date; about 12° Sagittarius. High confidence. Neptune at ~11° Sagittarius makes the conjunction solid.</p>
+        <p><b>Moon.</b> Counted forward from the December 3, 1975 new moon (~1.8 days × ~13°/day), landing near 3° Capricorn. Sign is fairly confident; the degree is approximate.</p>
+        <p><b>Ascendant and Midheaven.</b> Sidereal-time calculation by hand: Ascendant ~5° Aries, Midheaven ~4° Capricorn, which puts the Moon on the Midheaven. Moderate confidence; a 15-minute birth-time error moves the Ascendant ~4°.</p>
+        <p><b>Other planets.</b> From remembered late-1975 positions. High confidence for Venus, Mars (retrograde in Gemini), Jupiter, Saturn, Uranus, Neptune, Pluto; lower for Mercury near the Sagittarius/Capricorn cusp and for the exact Node degree.</p>
+        <p><b>Numerology.</b> Pythagorean arithmetic on "Paula Marie Greenfield": Life Path 11, Expression 2, Soul Urge 44/8, Personality 3, Personal Year 8. High confidence given the spelling.</p>
+        <p><b>Human Design.</b> Sun 12° Sagittarius maps to Gate 5.1; design Sun 88° earlier to Gate 64.3. Profile 1/3 and the Right Angle Cross of Consciousness are solid. Projector is the likely type from the gates I could place; design-side planets were only partly computed, so verify.</p>
+        <p><b>Gene Keys.</b> Follow directly from the Human Design gates.</p>
+        <p><b>Adventure list.</b> My suggestions, no search. Love language, favorite color, food and stories were not supplied; add them and the texts and gifts can be tuned.</p>
+        <p><b>To raise confidence:</b> run the birth data through astro.com and mybodygraph.com and check the Moon degree, the Ascendant, and the HD type.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<nav class="tabs" aria-label="Sections">
+  <button data-v="chart" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg>Chart</button>
+  <button data-v="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>Her</button>
+  <button data-v="texts"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Texts</button>
+  <button data-v="playbook"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Playbook</button>
+  <button data-v="burgers"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-4 0 2-6z"/></svg>Adventures</button>
+  <button data-v="sources"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>Sources</button>
+</nav>
+<script>
+const store = {
+  get(k, d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const tabs=[...document.querySelectorAll('nav.tabs button')];
+function show(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='v-'+v));
+  tabs.forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  window.scrollTo(0,0);
+  try{ history.replaceState(null,'','#'+v); }catch(e){}
+}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+const h=(location.hash||'').replace('#','');
+if(['chart','profile','texts','playbook','burgers','sources'].includes(h)) show(h);
+const glyphs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const planets=[
+ {g:'☉',n:'Sun',lon:252,title:'Sun in Sagittarius, conjunct Neptune',text:'Her core. Faith, meaning, big horizons, and Neptune adds imagination and compassion. She sees the best in people first. Protect her from giving past empty.'},
+ {g:'☽',n:'Moon',lon:273.5,title:'Moon in Capricorn, on the Midheaven',text:'Feelings run through responsibility and reputation. She shows love by handling things and would rather be respected than rescued. Keep your word; that is how she feels safe.'},
+ {g:'AC',n:'Ascendant',lon:4.6,title:'Aries rising',text:'Warmth, energy and nerve on first contact. She walks in like she belongs. Match her directness; do not make her wait.'},
+ {g:'☿',n:'Mercury',lon:272,title:'Mercury at the Sagittarius/Capricorn cusp',text:'Big-picture thinking with a practical edge. Lower confidence on the exact degree.'},
+ {g:'♀',n:'Venus',lon:267,title:'Venus in Sagittarius',text:'She loves through laughter, honesty and freedom. Adventure is affection. Heavy or small-minded loses her fast.'},
+ {g:'♂',n:'Mars',lon:72,title:'Mars retrograde in Gemini, opposite her Sun',text:'The live wire between belief and argument. Fast thinker, strong debater, restless. Explore ideas with her; never argue to win.'},
+ {g:'♃',n:'Jupiter',lon:13,title:'Jupiter in Aries, near the Ascendant',text:'Lucky when she moves first, generous to a fault, bigger than the room. Encourage the bold move.'},
+ {g:'♄',n:'Saturn',lon:122,title:'Saturn in Leo',text:'Pride earned the hard way. She takes recognition seriously because she worked for it.'},
+ {g:'♅',n:'Uranus',lon:214,title:'Uranus in Scorpio',text:'Generational: comfortable with depth and upheaval. She does not flinch.'},
+ {g:'♆',n:'Neptune',lon:251,title:'Neptune in Sagittarius, on her Sun',text:'The visionary signature. Idealism, spirituality, a tendency to see what could be rather than what is.'},
+ {g:'♇',n:'Pluto',lon:191,title:'Pluto in Libra',text:'Generational: power and transformation through relationships. Fairness is a lifelong theme.'},
+ {g:'☊',n:'North Node',lon:233,title:'North Node in Scorpio',text:'Growth direction: depth over breadth, intimacy over independence, letting a few people all the way in.'}
+];
+const svg=document.getElementById('wheel'); const NS='http://www.w3.org/2000/svg';
+const cx=170, cy=170, R=160, Rin=118, Rp=138;
+const asc=4.6;
+function ang(lon){ return (180 + (lon-asc)) * Math.PI/180 * -1 + Math.PI; }
+function pt(r,lon){ const a=ang(lon); return [cx+r*Math.cos(a), cy-r*Math.sin(a)]; }
+function el(t,attrs,parent){ const e=document.createElementNS(NS,t); for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||svg).appendChild(e); return e; }
+el('circle',{cx,cy,r:R,fill:'none',stroke:'#9FB0CC',"stroke-width":1});
+el('circle',{cx,cy,r:Rin,fill:'none',stroke:'#9FB0CC',"stroke-width":1,opacity:.6});
+el('circle',{cx,cy,r:60,fill:'none',stroke:'#9FB0CC',"stroke-width":1,opacity:.35});
+for(let i=0;i<12;i++){
+  const [x1,y1]=pt(Rin,i*30),[x2,y2]=pt(R,i*30);
+  el('line',{x1,y1,x2,y2,stroke:'#9FB0CC',"stroke-width":1,opacity:.7});
+  const [tx,ty]=pt((R+Rin)/2,i*30+15);
+  const t=el('text',{x:tx,y:ty+5,"text-anchor":'middle',class:'sign-label'}); t.style.fontSize='15px'; t.textContent=glyphs[i];
+}
+for(let d=0;d<360;d+=10){ const [x1,y1]=pt(Rin,d),[x2,y2]=pt(Rin-5,d); el('line',{x1,y1,x2,y2,stroke:'#9FB0CC',"stroke-width":1,opacity:.5}); }
+const [ax,ay]=pt(Rin,asc),[dx,dy]=pt(Rin,asc+180); el('line',{x1:ax,y1:ay,x2:dx,y2:dy,stroke:'#E08A3C',"stroke-width":1.5,opacity:.8});
+const [mx,my]=pt(Rin,273.6),[ix,iy]=pt(Rin,93.6); el('line',{x1:mx,y1:my,x2:ix,y2:iy,stroke:'#E08A3C',"stroke-width":1,opacity:.5,"stroke-dasharray":'3 3'});
+const sorted=[...planets].sort((a,b)=>a.lon-b.lon); let last=-99;
+sorted.forEach(p=>{ p.vis=p.lon; if(p.vis-last<7) p.vis=last+7; last=p.vis; });
+const readout=document.getElementById('readout');
+sorted.forEach(p=>{
+  const [x,y]=pt(Rp,p.vis); const [lx,ly]=pt(Rin,p.lon); const [lx2,ly2]=pt(Rp-11,p.vis);
+  el('line',{x1:lx,y1:ly,x2:lx2,y2:ly2,stroke:'#9FB0CC',"stroke-width":1,opacity:.6});
+  const g=el('g',{class:'planet',tabindex:0,role:'button','aria-label':p.title});
+  el('circle',{cx:x,cy:y,r:11,fill:'#2F4470',stroke:'#9FB0CC',"stroke-width":1},g);
+  const t=el('text',{x,y:y+4.5,"text-anchor":'middle'},g); t.textContent=p.g; if(p.g==='AC') t.style.fontSize='9px';
+  const sel=()=>{ document.querySelectorAll('.planet').forEach(q=>q.classList.remove('sel')); g.classList.add('sel');
+    readout.innerHTML=`<h3>${p.title}</h3><p>${p.text}</p>`; };
+  g.addEventListener('click',sel); g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();sel();} });
+});
+const ct=el('text',{x:cx,y:cy-4,"text-anchor":'middle',class:'sign-label'}); ct.style.fontSize='13px'; ct.textContent='Paula';
+const ct2=el('text',{x:cx,y:cy+12,"text-anchor":'middle',class:'sign-label'}); ct2.textContent='12·4·75';
+const LLS=['Words','Time','Gifts','Acts','Touch'];
+let ll=store.get('paula-ll',[0,0,0,0,0]);
+function renderLL(){
+  const box=document.getElementById('ll'); const max=Math.max(...ll);
+  box.innerHTML=LLS.map((n,i)=>`<button class="${max>0&&ll[i]===max?'hot':''}" onclick="bumpLL(${i})" aria-label="${n}: ${ll[i]}"><span class="n">${ll[i]}</span>${n}</button>`).join('');
+  const total=ll.reduce((a,b)=>a+b,0); const note=document.getElementById('ll-note');
+  if(!total) note.textContent='No data yet. Run the experiment for two weeks.';
+  else { const i=ll.indexOf(max); note.textContent=`${total} observations. Leading: ${LLS[i]} (${Math.round(max/total*100)}%). Keep running all five anyway; she notices.`; }
+}
+function bumpLL(i){ ll[i]++; store.set('paula-ll',ll); renderLL(); }
+function resetLL(){ ll=[0,0,0,0,0]; store.set('paula-ll',ll); renderLL(); }
+renderLL();
+const TXT={
+ 'Check in':[
+  'No agenda. Just checking the Sagittarius is still pointed at the horizon.',
+  'Week out of 10? One number, no explanation required.',
+  'Thinking about you. That is the whole text.',
+  'What is one thing you built this week that nobody clapped for? I am clapping.'
+ ],
+ 'Banter':[
+  'Found out you have a Capricorn Moon. Suddenly the color-coded calendar makes sense.',
+  'Your friend application has been escalated to senior leadership. Leadership is impressed.',
+  'I need a ruling on something and you are the only honest person I know.',
+  'Reminder that December 4 is a federal holiday in my house.'
+ ],
+ 'Adventure':[
+  'Doing something new Saturday. You are invited. I will put it on the calendar if you say yes.',
+  'Found a place neither of us has been. Day trip?',
+  'Live show Thursday. Weeknight rules: we leave when it stops being fun.',
+  'Road trip. Loose plan, good playlist. You in?'
+ ],
+ 'Recognize her':[
+  'You called that one months ago. Just so you know I noticed.',
+  'I used your read on that thing. You were right. Thank you.',
+  'Told someone about you today. Said you are the one who makes the room work. Standing by it.',
+  'You see how things actually work. Do not let anyone talk you out of that.'
+ ],
+ 'Go deeper':[
+  'What is a question you have been sitting with lately?',
+  'What are you building this year that no one knows about yet?',
+  'What did the last thing that did not work teach you?',
+  'What do you see about me that I probably do not?',
+  'McAllen question: what did growing up in the Valley give you that Austin people do not get?'
+ ],
+ 'Her birthday':[
+  'Blocking December 4 now. It is not getting folded into the holidays on my watch.',
+  'Birthday planning question: adventure, dinner, or both? Wrong answers accepted.',
+  'Your birthday is a standalone event this year. Non-negotiable.'
+ ]
+};
+let cat=Object.keys(TXT)[0], lastIdx=-1;
+function renderCats(){ document.getElementById('cats').innerHTML=Object.keys(TXT).map(c=>`<button class="${c===cat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join(''); }
+function setCat(c){ cat=c; lastIdx=-1; renderCats(); nextTxt(); }
+function nextTxt(){ const pool=TXT[cat]; let i; do{ i=Math.floor(Math.random()*pool.length);}while(pool.length>1&&i===lastIdx); lastIdx=i; document.getElementById('txt').textContent=pool[i]; document.getElementById('copybtn').textContent='Copy'; }
+async function copyTxt(){ const t=document.getElementById('txt').textContent; const b=document.getElementById('copybtn'); try{ await navigator.clipboard.writeText(t); b.textContent='Copied'; }catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); b.textContent='Copied';}catch(_){ b.textContent='Long-press to copy'; } document.body.removeChild(ta);} setTimeout(()=>b.textContent='Copy',1500); }
+renderCats(); nextTxt();
+const notes=document.getElementById('notes'); notes.value=store.get('paula-notes','');
+let nt; notes.addEventListener('input',()=>{ clearTimeout(nt); nt=setTimeout(()=>{ store.set('paula-notes',notes.value); document.getElementById('notesnote').textContent='Saved on this phone.'; },400); document.getElementById('notesnote').textContent='Saving…'; });
+const STEPS=[
+ {t:'Keep every commitment for 90 days',p:'Calendar it, show up on time, follow through on the small stuff.',w:'Capricorn Moon on the Midheaven. Reliability is how she decides who is safe.'},
+ {t:'Recognize her before you ask anything',p:'Tell her one specific thing you see in her. Then invite her into something.',w:'Projector mechanics plus Life Path 11.'},
+ {t:'Give her credit in public',p:'Say her name in a room she is not in, and make sure it gets back to her.',w:'Midheaven Moon: reputation is emotional territory.'},
+ {t:'Have one real idea conversation a month',p:'Bring a question, not an answer. Let it run long.',w:'Mars in Gemini, Head gates 63 and 64, Gate 11 energy.'},
+ {t:'Run all five love languages on purpose',p:'Small doses of each. Log which one lands on the Her tab.',w:'Unknown starting point; let the tracker decide.'},
+ {t:'Take her somewhere new',p:'One novel experience a month, scheduled and kept.',w:'Sag Sun, Venus in Sag, Aries rising. Adventure is affection.'}
+];
+let done=store.get('paula-steps',[]);
+function renderSteps(){
+  const box=document.getElementById('steps');
+  box.innerHTML=STEPS.map((s,i)=>`<div class="step ${done.includes(i)?'done':''}">
+    <button class="chk" onclick="toggleStep(${i})" aria-pressed="${done.includes(i)}" aria-label="Mark step ${i+1} done"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg></button>
+    <div class="txt"><h3>${s.t}</h3><p>${s.p}</p><div class="why">${s.w}</div></div></div>`).join('');
+  document.getElementById('pbar').style.width=(done.length/STEPS.length*100)+'%';
+  document.getElementById('pnote').textContent=`${done.length} of ${STEPS.length}`+(done.length===STEPS.length?' — application approved.':'');
+}
+function toggleStep(i){ done=done.includes(i)?done.filter(x=>x!==i):[...done,i]; store.set('paula-steps',done); renderSteps(); }
+renderSteps();
+const DEFAULT_B=[
+ {n:'Day trip somewhere neither of you has been',s:'Sag fuel'},
+ {n:'A long dinner built around one big question',s:'Gate 63, Mars in Gemini'},
+ {n:'A live show or talk on a weeknight',s:'Aries rising says yes'},
+ {n:'Introduce her to the right person over coffee',s:'Personal Year 8 harvest'},
+ {n:'A class or workshop she has been curious about',s:'1/3 experimenter'},
+ {n:'A road trip with a loose plan and a good playlist',s:'Rhythm plus adventure'},
+ {n:'Her December 4 birthday, done properly',s:'Standalone, planned to the minute'}
+];
+let burgers=store.get('paula-burgers', DEFAULT_B.map(b=>({...b,r:0})));
+function renderBurgers(){
+  const box=document.getElementById('burgers');
+  const list=[...burgers].map((b,i)=>({...b,i})).sort((a,b)=>b.r-a.r);
+  box.innerHTML=list.map((b,k)=>`<div class="burger">
+    <div class="rank">${b.r?k+1:'·'}</div>
+    <div class="name"><b>${b.n}</b><span>${b.s||''}</span></div>
+    <div class="stars" role="group" aria-label="Rate ${b.n}">${[1,2,3,4,5].map(s=>`<button class="${b.r>=s?'on':''}" onclick="rate(${b.i},${s})" aria-label="${s} stars">★</button>`).join('')}</div>
+  </div>`).join('');
+}
+function rate(i,s){ burgers[i].r = burgers[i].r===s?0:s; store.set('paula-burgers',burgers); renderBurgers(); }
+function addBurger(){ const inp=document.getElementById('newb'); const v=inp.value.trim(); if(!v) return; burgers.push({n:v,s:'Her idea',r:0}); inp.value=''; store.set('paula-burgers',burgers); renderBurgers(); }
+document.getElementById('newb').addEventListener('keydown',e=>{ if(e.key==='Enter') addBurger(); });
+renderBurgers();
+</script>
+</body>
+</html>

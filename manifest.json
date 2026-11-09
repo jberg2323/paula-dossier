@@ -1,0 +1,1 @@
+{"name": "The Paula Dossier", "short_name": "Paula", "start_url": "./", "scope": "./", "display": "standalone", "background_color": "#1F2A44", "theme_color": "#1F2A44", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
